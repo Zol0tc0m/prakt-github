@@ -1,0 +1,12 @@
+target-version = "py311"
+extend-exclude = ["**/migrations/**"]
+
+[lint]
+# Фокус на ошибках, которые ломают код (pyflakes + синтаксис), без стиля длины строк
+select = ["E9", "F"]
+ignore = [
+  "F401",
+  "F403",
+  "F405",
+  "F811",
+]

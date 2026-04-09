@@ -1,0 +1,107 @@
+# Практическая работа №11 — CI на GitHub Actions (аналог GitLab CI).
+#
+# Свой runner (self-hosted): см. .github/RUNNER_SETUP.txt
+# Сейчас используется облако GitHub. Чтобы гонять CI на своём раннере, в каждой
+# джобе замените:  runs-on: ubuntu-latest  →  runs-on: self-hosted  (или с метками).
+
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+defaults:
+  run:
+    working-directory: kursach
+
+env:
+  CI: "true"
+  PYTHONUNBUFFERED: "1"
+
+jobs:
+  build:
+    name: Сборка проекта
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kursach/requirements.txt
+
+      - name: Установка зависимостей
+        run: pip install -r requirements.txt
+
+      - name: Проверка конфигурации Django
+        run: python manage.py check
+
+      - name: Сборка статики (collectstatic)
+        run: python manage.py collectstatic --noinput
+
+      - name: Архив статики для артефакта
+        run: tar -czvf staticfiles-ci.tar.gz -C . staticfiles
+
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: django-staticfiles
+          path: kursach/staticfiles-ci.tar.gz
+          if-no-files-found: error
+
+  lint:
+    name: Линтер (Ruff)
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kursach/requirements.txt
+
+      - run: pip install -r requirements.txt
+
+      - name: JSON-отчёт линтера (сохраняется даже при замечаниях)
+        run: ruff check . --output-format json > ruff-report.json || true
+
+      - name: Строгая проверка Ruff
+        run: ruff check .
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ruff-report
+          path: kursach/ruff-report.json
+          if-no-files-found: warn
+
+  functional:
+    name: Доп. проверки (миграции + smoke-тест API)
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: kursach/requirements.txt
+
+      - run: pip install -r requirements.txt
+
+      - name: Нет забытых миграций
+        run: python manage.py makemigrations --check --dry-run
+
+      - name: Smoke-тест REST (каталог товаров)
+        run: pytest tests/tests_api.py::TestAPI::test_get_products_list -v --junitxml=junit-smoke.xml
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pytest-smoke-junit
+          path: kursach/junit-smoke.xml
+          if-no-files-found: warn

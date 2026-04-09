@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}Профиль{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Профиль</h2>
+
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} mb-3">{{ message }}</div>
+  {% endfor %}
+{% endif %}
+
+<div class="row">
+  <!-- Основная информация -->
+  <div class="col-md-6">
+    <div class="card mb-4">
+      <div class="card-header"><h5 class="mb-0">Основная информация</h5></div>
+      <div class="card-body">
+        <form method="post">
+          {% csrf_token %}
+          {{ customer_form.non_field_errors }}
+          <div class="mb-3">
+            <label class="form-label">Имя</label>
+            {{ customer_form.first_name }}
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Фамилия</label>
+            {{ customer_form.last_name }}
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Телефон</label>
+            {{ customer_form.phone }}
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Email</label>
+            {{ customer_form.email }}
+          </div>
+          <button type="submit" name="update_customer" class="btn btn-primary">Сохранить</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Профиль -->
+  <div class="col-md-6">
+    <div class="card mb-4">
+      <div class="card-header"><h5 class="mb-0">Доп. информация</h5></div>
+      <div class="card-body">
+        <form method="post">
+          {% csrf_token %}
+          {{ profile_form.non_field_errors }}
+          <div class="mb-3">
+            <label class="form-label">Дата рождения</label>
+            {{ profile_form.date_of_birth }}
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Пол</label>
+            {{ profile_form.gender }}
+          </div>
+          <button type="submit" name="update_profile" class="btn btn-primary">Сохранить</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Адреса из заказов (только просмотр) -->
+<div class="card mb-4">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h5 class="mb-0">Мои адреса (сохранены при оформлении заказов)</h5>
+  </div>
+  <div class="card-body">
+    {% if addresses %}
+      <div class="row">
+        {% for address in addresses %}
+          <div class="col-md-6 mb-3">
+            <div class="card {% if address.is_default %}border-primary{% endif %}">
+              <div class="card-body">
+                {% if address.is_default %}
+                  <span class="badge bg-primary float-end">По умолчанию</span>
+                {% endif %}
+
+                <p class="mb-1">{{ address.line1 }}</p>
+                {% if address.line2 %}<p class="mb-1">{{ address.line2 }}</p>{% endif %}
+                <p class="mb-1">
+                  {{ address.city }}{% if address.state %}, {{ address.state }}{% endif %}
+                </p>
+                <p class="mb-1">{{ address.postal_code }}</p>
+                <p class="mb-0">{{ address.country }}</p>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="text-muted mb-0">
+        Адреса появятся после оформления заказов. Добавление адреса выполняется на этапе «Оформление заказа».
+      </p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

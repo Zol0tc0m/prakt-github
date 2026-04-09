@@ -1,0 +1,12 @@
+# Runtime
+Django>=5.2,<6
+djangorestframework>=3.14
+psycopg2-binary>=2.9
+Pillow>=10
+
+# Tests
+pytest>=8
+pytest-django>=4.8
+
+# CI tooling (lint)
+ruff>=0.8

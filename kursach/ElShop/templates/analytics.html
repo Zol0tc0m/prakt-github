@@ -1,0 +1,71 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+{% block title %}Аналитика{% endblock %}
+
+{% block content %}
+<h1>📊 Аналитика магазина</h1>
+
+<a href="{% url 'export_analytics_csv' %}?start_date={{ start_date }}&end_date={{ end_date }}"
+   class="btn btn-success ml-3">
+  ⬇ Экспорт CSV
+</a>
+<hr>
+
+<h2>📊 Продажи по категориям</h2>
+<canvas id="categoryChart"></canvas>
+
+<h2 class="mt-4">💰 Доход по дням</h2>
+<canvas id="revenueChart"></canvas>
+
+<h2 class="mt-4">🥇 Топ-5 товаров</h2>
+<canvas id="topProductChart"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+{# Безопасно прокидываем данные в JS #}
+{{ category_labels|json_script:"category-labels" }}
+{{ category_data|json_script:"category-data" }}
+{{ revenue_labels|json_script:"revenue-labels" }}
+{{ revenue_data|json_script:"revenue-data" }}
+{{ top_labels|json_script:"top-labels" }}
+{{ top_data|json_script:"top-data" }}
+
+<script>
+const categoryLabels = JSON.parse(document.getElementById('category-labels').textContent);
+const categoryData   = JSON.parse(document.getElementById('category-data').textContent);
+const revenueLabels  = JSON.parse(document.getElementById('revenue-labels').textContent);
+const revenueData    = JSON.parse(document.getElementById('revenue-data').textContent);
+const topLabels      = JSON.parse(document.getElementById('top-labels').textContent);
+const topData        = JSON.parse(document.getElementById('top-data').textContent);
+
+// --- Продажи по категориям ---
+new Chart(document.getElementById('categoryChart'), {
+  type: 'bar',
+  data: {
+    labels: categoryLabels,
+    datasets: [{ label: 'Продано единиц', data: categoryData }]
+  },
+  options: { responsive: true }
+});
+
+// --- Доход по дням ---
+new Chart(document.getElementById('revenueChart'), {
+  type: 'line',
+  data: {
+    labels: revenueLabels,
+    datasets: [{ label: 'Доход (₽)', data: revenueData, fill: false, tension: 0.2 }]
+  },
+  options: { responsive: true }
+});
+
+// --- Топ-5 товаров ---
+new Chart(document.getElementById('topProductChart'), {
+  type: 'pie',
+  data: {
+    labels: topLabels,
+    datasets: [{ data: topData }]
+  },
+  options: { responsive: true }
+});
+</script>
+{% endblock %}

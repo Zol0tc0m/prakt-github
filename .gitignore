@@ -1,0 +1,6 @@
+/venv
+kursach/db_ci.sqlite3
+kursach/staticfiles/
+kursach/ruff-report.json
+kursach/junit*.xml
+kursach/staticfiles-ci.tar.gz

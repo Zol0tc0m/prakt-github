@@ -1,0 +1,256 @@
+# ⚡ ElectroShop — Интернет-магазин электроники
+
+[![Python](https://img.shields.io/badge/Python-3.11-blue?logo=python)](https://www.python.org/)
+[![Django](https://img.shields.io/badge/Django-5.2-green?logo=django)](https://www.djangoproject.com/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue?logo=postgresql)](https://www.postgresql.org/)
+[![DRF](https://img.shields.io/badge/DRF-API-red?logo=django)](https://www.django-rest-framework.org/)
+[![License](https://img.shields.io/badge/license-MIT-lightgrey)](#)
+
+Полнофункциональный учебный проект интернет-магазина электроники на **Django + REST API(DRF)**,  
+с корзиной, оформлением заказов, профилем пользователя, аналитикой и API-интерфейсом.
+
+---
+
+## 🚀 Основные возможности
+
+- 🔐 Регистрация и авторизация пользователей  
+- 🛒 Корзина и оформление заказов  
+- 💳 Оплата (демо-режим) и история покупок  
+- 🧾 REST API для интеграций  
+- 📊 Аналитика и экспорт CSV  
+- 📦 Импорт и экспорт товаров  
+- 👤 Профиль пользователя и настройки интерфейса  
+- 🗃️ Бэкап и восстановление базы данных  
+- ⚙️ Поддержка PostgreSQL (PgAdmin)
+
+---
+
+## 🧩 Архитектура проекта
+
+**Стек:**
+| Компонент | Технология |
+|------------|-------------|
+| Backend | Django 5.2, Django REST Framework |
+| Database | PostgreSQL (через PgAdmin) |
+| Frontend | Django templates + Bootstrap 5 |
+| Tests | pytest / pytest-django |
+| Load test | Locust |
+
+**Основные модули:**
+```
+kursach/
+├── manage.py
+├── locustfile.py
+├── pytest.ini
+├── kursach/
+│   ├── settings.py
+│   ├── urls.py
+│   ├── wsgi.py
+│   └── asgi.py
+└── ElShop/
+    ├── models.py
+    ├── views.py
+    ├── serializers.py
+    ├── templates/
+    ├── management/commands/
+    │   ├── backup.py
+    │   └── restore.py
+    └── static/
+```
+
+**Основные сущности:**
+- `Customer`, `Supplier`, `Product`, `Category`
+- `Order`, `OrderItem`, `Payment`
+- `Warehouse`, `Inventory`, `AuditLog`
+- `UserSettings`, `Address`, `CustomerProfile`
+
+---
+
+## 👥 Роли и права доступа
+
+| Роль | Описание |
+|------|-----------|
+| 🧑‍💻 Администратор | Управление пользователями, товарами, заказами и аналитикой |
+| 🏪 Менеджер | Добавление и редактирование товаров, работа с заказами |
+| 👤 Покупатель | Просмотр каталога, корзина, оформление заказов, профиль |
+| 🕶️ Гость | Просмотр каталога и карточек товаров |
+
+Ролевая модель реализована через стандартные флаги `is_staff`, `is_superuser` и модель `Customer`.
+
+---
+
+## ⚙️ Установка и запуск (локально)
+
+### 1️⃣ Создать виртуальное окружение
+```bash
+python -m venv venv
+# Windows
+venv\Scripts\activate
+# Linux/macOS
+source venv/bin/activate
+```
+
+### 2️⃣ Установить зависимости
+```bash
+pip install -r requirements.txt
+```
+
+Если файла нет — установите вручную:
+```bash
+pip install Django djangorestframework psycopg2-binary pytest pytest-django locust
+```
+
+### 3️⃣ Настроить базу данных PostgreSQL
+
+В проекте используется **только PostgreSQL**.  
+Создайте базу данных через PgAdmin или psql:
+
+```sql
+CREATE DATABASE ElectroShop;
+```
+
+Проверьте настройки в `kursach/kursach/settings.py`:
+```python
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'ElectroShop',
+        'USER': 'postgres',
+        'PASSWORD': '1',
+        'HOST': '127.0.0.1',
+        'PORT': '5432',
+    }
+}
+```
+
+---
+
+### 4️⃣ Применить миграции и создать суперпользователя
+```bash
+cd kursach
+python manage.py migrate
+python manage.py createsuperuser
+```
+
+---
+
+### 5️⃣ Запустить сервер разработки
+```bash
+python manage.py runserver
+```
+
+После запуска:
+- 🏠 Главная страница магазина: http://127.0.0.1:8000/  
+- 🔑 Админка: http://127.0.0.1:8000/admin/  
+- ⚙️ REST API: http://127.0.0.1:8000/api/
+
+---
+
+## 🌐 API (основные эндпоинты)
+
+| Метод | URL | Описание |
+|--------|-----|-----------|
+| `GET` | `/api/products/` | Каталог товаров |
+| `GET` | `/api/products/{id}/` | Детали товара |
+| `GET` | `/api/orders/` | История заказов |
+| `POST` | `/api/orders/` | Создание заказа |
+| `GET` | `/api/customers/` | Клиенты |
+| `GET` | `/api/payments/` | Платежи |
+| `GET` | `/analytics/` | Аналитика в веб-интерфейсе |
+| `GET` | `/export-products/` | Экспорт CSV |
+| `POST` | `/import-products/` | Импорт CSV |
+
+---
+
+## 🧪 Тестирование
+
+### Unit-тесты
+```bash
+pytest
+```
+
+### Нагрузочное тестирование (Locust)
+```bash
+locust -f locustfile.py
+```
+Интерфейс откроется на [http://127.0.0.1:8089](http://127.0.0.1:8089).
+
+---
+
+## 💾 Резервное копирование и восстановление
+
+```bash
+# Создать резервную копию
+python manage.py backup
+
+# Восстановить из файла
+python manage.py restore --file backups/latest.dump
+```
+
+Файлы сохраняются в папке `backups/`.
+
+---
+
+## ⌨️ Горячие клавиши
+
+| Комбинация | Действие |
+|-------------|-----------|
+| `Ctrl + R` | Обновить страницу |
+| `Ctrl + I` | Импорт данных |
+| `Ctrl + E` | Экспорт данных |
+| `Ctrl + F` | Открыть панель фильтров |
+| `Ctrl + A` | Перейти в раздел аналитики |
+| `Ctrl + P` | Открыть профиль пользователя |
+| `Ctrl + H` | Перейти на домашнюю страницу |
+| `Ctrl + D` | Переключить тему |
+| `Ctrl + /` | Показать справку по горячим клавишам |
+
+---
+
+## 🧰 Полезные команды
+
+| Команда | Назначение |
+|----------|------------|
+| `python manage.py runserver` | Запустить сервер |
+| `python manage.py createsuperuser` | Создать администратора |
+| `python manage.py backup` | Резервная копия БД |
+| `python manage.py restore` | Восстановление из копии |
+| `pytest` | Автотесты |
+| `locust` | Нагрузочные тесты |
+
+---
+
+## 🧱 Структура проекта
+
+```
+kursach/
+├── manage.py
+├── kursach/
+│   ├── settings.py
+│   ├── urls.py
+│   ├── wsgi.py
+│   └── asgi.py
+├── ElShop/
+│   ├── models.py
+│   ├── views.py
+│   ├── serializers.py
+│   ├── templates/
+│   ├── static/
+│   └── management/commands/
+│       ├── backup.py
+│       └── restore.py
+├── media/
+└── tests/
+```
+
+---
+
+## 📈 Аналитика и экспорт
+
+- `/analytics/` — графики продаж и активности  
+- `/analytics/export/` — выгрузка данных в CSV  
+- `/export-products/`, `/import-products/` — обмен товарами в CSV  
+
+---
+
+🧠 **ElectroShop** — учебный проект интернет-магазина электроники, демонстрирующий архитектуру Django-приложения с REST API, системой ролей и встроенной аналитикой.
