@@ -67,7 +67,7 @@ jobs:
       - run: pip install -r requirements.txt
 
       - name: JSON-отчёт линтера (сохраняется даже при замечаниях)
-        run: ruff check . --output-format json > ruff-report.json || true
+        run: ruff check . --output-format json > ruff-report.json; $global:LASTEXITCODE = 0
 
       - name: Строгая проверка Ruff
         run: ruff check .

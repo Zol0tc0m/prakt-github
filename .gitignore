@@ -4,3 +4,4 @@ kursach/staticfiles/
 kursach/ruff-report.json
 kursach/junit*.xml
 kursach/staticfiles-ci.tar.gz
+/actions-runner
